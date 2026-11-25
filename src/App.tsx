@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { BrowserRouter, NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import {
-  Activity, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, CircleHelp, ClipboardList, Clock3,
+  Activity, ArrowUpRight, Bell, CalendarDays, Check, ChevronRight, ClipboardList, Clock3,
   FileText, Heart, Home, Leaf, LockKeyhole, Menu, MessageCircle, MoreHorizontal, Pill, Plus, Settings,
-  ShieldCheck, Sparkles, Stethoscope, Sun, UserRound, UsersRound, Wind, X, Zap
+  ShieldCheck, Sparkles, Stethoscope, Sun, UserRound, UsersRound, Wind, Zap
 } from 'lucide-react';
 
 type IconType = typeof Home;
