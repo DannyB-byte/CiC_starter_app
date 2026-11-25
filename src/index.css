@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root { font-family: 'Inter', sans-serif; color: #f8f2e8; background: #050505; font-synthesis: none; }
 * { box-sizing: border-box; }
