@@ -1,11 +1,12 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, Check, ChevronDown, LockKeyhole, Pencil, Plus, Thermometer, Trash2, X } from 'lucide-react';
 
 import AppShell from './components/AppShell';
 import { Alert, Badge, Button, Card, EmptyState, FormField, PageHeader } from './components/ui';
 
-import { createId, displayTemperature, formatDate, formatTime, isReadingList, parseTemperature, STORAGE_KEY, todayString } from './domain/readings';
+import { createId, displayTemperature, formatDate, formatTime, parseTemperature, todayString } from './domain/readings';
 import type { Reading, ReadingDraft } from './domain/readings';
+import { loadReadings, saveReadings } from './domain/readingRepository';
 
 function cacheLoadedAssets(worker: ServiceWorker) {
   const origin = window.location.origin;
@@ -34,6 +35,7 @@ function cacheLoadedAssets(worker: ServiceWorker) {
 function App() {
   const [readings, setReadings] = useState<Reading[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const savedRaw = useRef<string | null>(null);
   const [storageError, setStorageError] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ReadingDraft>({ date: todayString(), temperature: '36.8', note: '' });
@@ -44,14 +46,9 @@ function App() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-        if (!isReadingList(parsed)) {
-          throw new Error('Saved readings have an unexpected format.');
-        }
-        setReadings(parsed);
-      }
+      const snapshot = loadReadings(window.localStorage);
+      savedRaw.current = snapshot.raw;
+      setReadings(snapshot.readings);
       setLoaded(true);
     } catch (error) {
       setStorageError(error instanceof Error ? error.message : 'Your saved readings could not be opened.');
@@ -91,13 +88,16 @@ function App() {
   }, [readings]);
 
   function persist(next: Reading[], successMessage: string) {
+    if (!loaded) return false;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      setReadings(next);
+      const snapshot = saveReadings(window.localStorage, next, savedRaw.current);
+      savedRaw.current = snapshot.raw;
+      setReadings(snapshot.readings);
       setMessage(successMessage);
       setStorageError('');
       return true;
     } catch (error) {
+      setMessage('');
       setStorageError(error instanceof Error ? error.message : 'Your reading could not be saved on this device.');
       return false;
     }
@@ -105,7 +105,7 @@ function App() {
 
   function submitReading(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!loaded || storageError) return;
+    if (!loaded) return;
 
     const temperature = parseTemperature(draft.temperature);
     if (temperature === null) return;
@@ -204,7 +204,7 @@ function App() {
             {message && <Alert tone="success"><Check size={15} /> {message}</Alert>}
             <div className="form-actions">
               {editingId && <Button variant="secondary" type="button" onClick={cancelEdit}><X size={15} /> Cancel</Button>}
-              <Button className="save-reading" type="submit" disabled={!loaded || Boolean(storageError)}>
+              <Button className="save-reading" type="submit" disabled={!loaded}>
                 {editingId ? <Check size={16} /> : <Plus size={16} />}
                 {editingId ? 'Save correction' : 'Save reading'}
               </Button>
