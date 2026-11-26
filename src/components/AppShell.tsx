@@ -19,7 +19,7 @@ export default function AppShell({ children, page, online, offlineReady, offline
       <StatusIndicator className={`connection-status ${online && !offlineError ? '' : 'offline'}`} title={offlineError}>
         {online ? <LockKeyhole size={15}/> : <WifiOff size={15}/>}
         <span>{online ? offlineError ? 'Offline setup unavailable' : offlineReady ? 'Private and ready offline' : 'Setting up offline diary…' : 'Offline · your diary is here'}</span>
-      </StatusIndicator></header><main id="main-content" tabIndex={-1}>{children}</main></div>
+      </StatusIndicator></header><p className="cic-demo-notice" role="note">Demonstration only — use fictional data. Not for clinical use.</p><main id="main-content" tabIndex={-1}>{children}</main></div>
     <Navigation mobile page={page}/>
   </div>;
 }

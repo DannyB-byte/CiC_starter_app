@@ -1,24 +1,21 @@
-export function cacheLoadedAssets(worker: ServiceWorker) {
-  const origin = window.location.origin;
-  const urls = [...new Set(
-    performance.getEntriesByType('resource')
-      .map((entry) => entry.name)
-      .filter((url) => new URL(url).origin === origin)
-  )];
-
+export function cacheLoadedAssets(worker: ServiceWorker, signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
     const channel = new MessageChannel();
-    const timeout = window.setTimeout(() => reject(new Error('Offline setup timed out.')), 10000);
-    channel.port1.onmessage = (event: MessageEvent<{ type?: string; message?: string }>) => {
+    function cleanup() {
       window.clearTimeout(timeout);
-      if (event.data.type === 'CACHE_READY') {
-        resolve();
-      } else {
-        reject(new Error(event.data.message ?? 'The app files could not be cached.'));
-      }
+      signal.removeEventListener('abort', abort);
       channel.port1.close();
+    }
+    function abort() { cleanup(); reject(new Error('Offline setup cancelled.')); }
+    const timeout = window.setTimeout(() => { cleanup(); reject(new Error('Offline setup timed out.')); }, 10000);
+    if (signal.aborted) { abort(); channel.port2.close(); return; }
+    signal.addEventListener('abort', abort, { once: true });
+    channel.port1.onmessage = (event: MessageEvent<{ type?: string }>) => {
+      cleanup();
+      if (event.data?.type === 'CACHE_READY') resolve();
+      else reject(new Error('The app files could not be cached.'));
     };
-    worker.postMessage({ type: 'CACHE_URLS', urls }, [channel.port2]);
+    try { worker.postMessage({ type: 'CACHE_URLS', urls: [] }, [channel.port2]); }
+    catch { cleanup(); channel.port2.close(); reject(new Error('Offline worker unavailable.')); }
   });
 }
-

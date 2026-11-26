@@ -33,3 +33,5 @@
 
 @media(max-width:899px){.cic-mobile-nav{gap:2px;padding-inline:4px}.cic-mobile-nav a{flex:1;min-width:0;flex-direction:column;gap:2px;padding:4px 1px;font-size:11px}.cic-mobile-nav a svg{width:18px;height:18px}}
 @media print{.cic-sidebar,.cic-mobile-nav,.diary-header,.cic-skip,.cic-report button,.cic-report label{display:none!important}.cic-shell{display:block}.cic-report,.cic-report *{color:#000!important;background:#fff!important;box-shadow:none!important}.cic-report article{break-inside:avoid}}
+
+.cic-demo-notice { margin: 0; padding: 0.65rem 1rem; text-align: center; font-size: 0.875rem; color: #f1dfb9; background: #302a1e; }

@@ -6,9 +6,11 @@ import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   base: './',
-  plugins: [react(), { name: 'cic-offline-manifest', apply: 'build', closeBundle() {
+  plugins: [react(), { name: 'cic-production-csp', apply: 'build', transformIndexHtml() {
+    return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" }, injectTo: 'head-prepend' }];
+  } }, { name: 'cic-offline-manifest', apply: 'build', closeBundle() {
     const files = readdirSync('dist', {recursive:true}).map(String).map(f=>f.replaceAll('\\','/')).filter(f=>/\.(html|js|css|svg|png|ico|webmanifest)$/.test(f) && f!=='sw.js').sort();
-    const hash=createHash('sha256'); for(const f of files) hash.update(readFileSync(`dist/${f}`));
+    const hash=createHash('sha256'); hash.update(readFileSync('dist/sw.js')); for(const f of files) hash.update(readFileSync(`dist/${f}`));
     const worker=readFileSync('dist/sw.js','utf8').replace('chemo-in-comfort-v4',`chemo-in-comfort-${hash.digest('hex').slice(0,16)}`).replace("['./', './index.html']",JSON.stringify(['./',...files.map(f=>`./${f}`)]));
     writeFileSync('dist/sw.js',worker);
   }}],
