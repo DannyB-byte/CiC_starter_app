@@ -24,3 +24,9 @@
 .cic-dashboard-card p, .cic-dashboard-note { color: var(--cic-muted); margin-top: 12px; font-size: 14px; }
 .cic-dashboard-link { display: flex; align-items: center; gap: 12px; min-height: 48px; margin-top: 20px; padding: 12px; border: 1px solid var(--cic-border); border-radius: 8px; color: var(--cic-champagne); }
 .cic-dashboard-link svg { flex-shrink: 0; }
+
+.tracking label { margin: 12px 0; }
+.tracking input, .tracking select { display:block; min-height:44px; padding:8px; width:100%; background:var(--cic-input); color:var(--cic-ivory); border:1px solid var(--cic-border); border-radius:7px; }
+.tracking article { margin-top:12px; overflow-wrap:anywhere; }
+.cic-mobile-nav a { padding-inline: 8px; }
+.cic-mobile-nav a svg { flex-shrink:0; }

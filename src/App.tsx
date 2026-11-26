@@ -1,3 +1,4 @@
+import { Tracking } from './features/tracking/Tracking';
 import { Dashboard } from './features/home/Dashboard';
 import { usePage } from './navigation';
 import { LockKeyhole } from 'lucide-react';
@@ -14,7 +15,7 @@ function App() {
   const offline = useOfflineStatus();
   return (
     <AppShell {...offline} page={page}>
-      {page === 'home' ? <Dashboard {...diary} /> : (
+      {page === 'home' ? <Dashboard {...diary} /> : page === 'tracking' ? <Tracking /> : (
       <div className="diary-content">
         <PageHeader eyebrow="YOUR PERSONAL DIARY" title="One moment at a time.">
           <p>Keep a simple temperature reading or note for yourself. Nothing is shared unless you choose.</p>

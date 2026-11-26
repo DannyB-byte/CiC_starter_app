@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { BrandLogo, StatusIndicator } from './ui';
-import { BookOpen, House, LockKeyhole, WifiOff } from 'lucide-react';
+import { Activity, BookOpen, House, LockKeyhole, WifiOff } from 'lucide-react';
 import type { Page } from '../navigation';
 
-const navigation = [{ label: 'Home', href: '#home', page: 'home', icon: House }, { label: 'Diary', href: '#diary', page: 'diary', icon: BookOpen }] as const;
+const navigation = [{ label: 'Home', href: '#home', page: 'home', icon: House }, { label: 'Diary', href: '#diary', page: 'diary', icon: BookOpen }, { label: 'Tracking', href: '#tracking', page: 'tracking', icon: Activity }] as const;
 function Navigation({ mobile = false, page }: { mobile?: boolean; page: Page }) {
   return <nav className={mobile ? 'cic-mobile-nav' : 'cic-sidebar-nav'} aria-label={mobile ? 'Mobile navigation' : 'Main navigation'}>
     {navigation.map(({ label, href, page: target, icon: Icon }) => <a key={href} href={href} aria-current={page === target ? 'page' : undefined}><Icon size={20} aria-hidden="true"/><span>{label}</span></a>)}
