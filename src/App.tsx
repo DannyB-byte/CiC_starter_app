@@ -185,7 +185,7 @@ function App() {
       <header className="diary-header">
         <a className="diary-brand" href="/" aria-label="Chemo in Comfort home">
           <span className="diary-brand-mark"><Leaf size={19} /></span>
-          <span>CHEMO IN COMFORT<small>A little space for you</small></span>
+          <span>CHEMO IN COMFORT<small>Dignity Through Treatment</small></span>
         </a>
         <div className={`connection-status ${online && !offlineError ? '' : 'offline'}`} role="status" title={offlineError}>
           {online ? <LockKeyhole size={15} /> : <WifiOff size={15} />}

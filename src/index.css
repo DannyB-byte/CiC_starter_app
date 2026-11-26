@@ -133,3 +133,261 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .reading-action { width: 36px; height: 44px; }
   .diary-footer { align-items: flex-start; line-height: 1.5; }
 }
+
+
+/* ==================================================
+   CHEMO IN COMFORT
+   Dark-first brand foundation
+   ================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --cic-background: #11120f;
+  --cic-surface: #1c1e19;
+  --cic-surface-raised: #252720;
+  --cic-input: #151711;
+  --cic-champagne: #d0c1a2;
+  --cic-ivory: #ede5d6;
+  --cic-muted: #b8b1a4;
+  --cic-border: #77796b;
+  --cic-divider: #393b31;
+  --cic-success: #a8c69f;
+  --cic-warning: #f0ca80;
+  --cic-danger: #ffaaaa;
+
+  background: var(--cic-background);
+  color: var(--cic-ivory);
+}
+
+html,
+body,
+#root,
+.diary-app {
+  background: var(--cic-background);
+  color: var(--cic-ivory);
+}
+
+.diary-app {
+  min-height: 100dvh;
+}
+
+.diary-app .diary-header {
+  background: var(--cic-background);
+  border-color: var(--cic-divider);
+}
+
+.diary-app .diary-brand {
+  color: var(--cic-champagne);
+}
+
+.diary-app .diary-brand small {
+  color: var(--cic-muted);
+}
+
+.diary-app .diary-brand-mark {
+  background: var(--cic-champagne);
+  color: var(--cic-background);
+  border-color: var(--cic-champagne);
+}
+
+.diary-app .connection-status {
+  background: var(--cic-surface);
+  color: var(--cic-success);
+  border-color: var(--cic-divider);
+}
+
+.diary-app .connection-status.offline {
+  color: var(--cic-warning);
+}
+
+.diary-app .diary-eyebrow {
+  color: var(--cic-champagne);
+}
+
+.diary-app .diary-eyebrow > span {
+  background: var(--cic-champagne);
+}
+
+.diary-app h1,
+.diary-app h2,
+.diary-app h3,
+.diary-app strong {
+  color: var(--cic-ivory);
+}
+
+.diary-app .diary-intro p,
+.diary-app .reading-count,
+.diary-app .reading-time,
+.diary-app .reading-details p,
+.diary-app .diary-footer,
+.diary-app .empty-readings p,
+.diary-app label small {
+  color: var(--cic-muted);
+}
+
+.diary-app .reading-form-card,
+.diary-app .reading-item,
+.diary-app .empty-readings {
+  background: var(--cic-surface);
+  border-color: var(--cic-divider);
+  box-shadow: none;
+}
+
+.diary-app .form-icon,
+.diary-app .empty-icon {
+  background: var(--cic-surface-raised);
+  color: var(--cic-champagne);
+}
+
+.diary-app label,
+.diary-app label > span {
+  color: var(--cic-ivory);
+}
+
+.diary-app .temperature-input,
+.diary-app .date-input,
+.diary-app textarea {
+  background: var(--cic-input);
+  border-color: var(--cic-border);
+  color: var(--cic-ivory);
+}
+
+.diary-app input {
+  color-scheme: dark;
+  color: var(--cic-ivory);
+  background: transparent;
+}
+
+.diary-app .temperature-input span,
+.diary-app .date-input svg {
+  color: var(--cic-muted);
+}
+
+.diary-app textarea::placeholder,
+.diary-app input::placeholder {
+  color: var(--cic-muted);
+  opacity: 1;
+}
+
+.diary-app .button.primary {
+  background: var(--cic-champagne);
+  color: var(--cic-background);
+  border-color: var(--cic-champagne);
+  box-shadow: none;
+}
+
+.diary-app .button.primary:hover {
+  background: #e0d3b9;
+}
+
+.diary-app .button.secondary,
+.diary-app .reading-action {
+  background: var(--cic-surface-raised);
+  color: var(--cic-champagne);
+  border-color: var(--cic-border);
+}
+
+.diary-app .reading-action:hover,
+.diary-app .button.secondary:hover {
+  background: #34372d;
+}
+
+.diary-app .delete-action {
+  color: var(--cic-danger);
+}
+
+.diary-app .reading-value,
+.diary-app .reading-value strong,
+.diary-app .reading-value span {
+  color: var(--cic-champagne);
+}
+
+.diary-app .diary-success {
+  color: var(--cic-success);
+  background: var(--cic-surface);
+}
+
+.diary-app .diary-error {
+  color: var(--cic-danger);
+  background: #321e1e;
+}
+
+.diary-app .diary-footer,
+.diary-app .reading-day,
+.diary-app .readings-heading {
+  border-color: var(--cic-divider);
+}
+
+.diary-app button:focus-visible,
+.diary-app a:focus-visible,
+.diary-app input:focus-visible,
+.diary-app textarea:focus-visible {
+  outline: 2px solid var(--cic-champagne);
+  outline-offset: 3px;
+}
+
+.diary-app button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+::selection {
+  background: var(--cic-champagne);
+  color: var(--cic-background);
+}
+
+/* CiC dark theme refinement */
+
+.diary-app .reading-count {
+  background: var(--cic-surface-raised);
+  color: var(--cic-ivory);
+  border: 1px solid var(--cic-divider);
+}
+
+.diary-app .diary-content {
+  width: 100%;
+  max-width: 1000px;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 40px);
+  box-sizing: border-box;
+}
+
+.diary-app .diary-intro h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.15;
+}
+
+.diary-app .temperature-input input {
+  font-size: 26px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.diary-app .connection-status {
+  background: transparent;
+}
+
+.diary-app .date-input > svg {
+  display: none;
+}
+
+.diary-app .date-input input {
+  width: 100%;
+  min-width: 0;
+}
+
+.diary-app .reading-action {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.diary-app .save-reading {
+  min-height: 48px;
+}
+
+@media (max-width: 600px) {
+  .diary-app .save-reading {
+    width: 100%;
+  }
+}
