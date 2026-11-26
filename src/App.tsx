@@ -4,9 +4,9 @@ import { CalendarDays, Check, ChevronDown, LockKeyhole, Pencil, Plus, Thermomete
 import AppShell from './components/AppShell';
 import { Alert, Badge, Button, Card, EmptyState, FormField, PageHeader } from './components/ui';
 
-import { createId, displayTemperature, formatDate, formatTime, parseTemperature, todayString } from './domain/readings';
+import { STORAGE_KEY, displayTemperature, formatDate, formatTime, parseTemperature, todayString } from './domain/readings';
 import type { Reading, ReadingDraft } from './domain/readings';
-import { loadReadings, saveReadings } from './domain/readingRepository';
+import { loadReadings, mutateReadings } from './domain/readingRepository';
 
 function cacheLoadedAssets(worker: ServiceWorker) {
   const origin = window.location.origin;
@@ -35,7 +35,9 @@ function cacheLoadedAssets(worker: ServiceWorker) {
 function App() {
   const [readings, setReadings] = useState<Reading[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const savedRaw = useRef<string | null>(null);
+  const busy = useRef(false);
+  const [saving, setSaving] = useState(false);
+  const editBase = useRef<Reading | null>(null);
   const [storageError, setStorageError] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ReadingDraft>({ date: todayString(), temperature: '36.8', note: '' });
@@ -47,7 +49,6 @@ function App() {
   useEffect(() => {
     try {
       const snapshot = loadReadings(window.localStorage);
-      savedRaw.current = snapshot.raw;
       setReadings(snapshot.readings);
       setLoaded(true);
     } catch (error) {
@@ -70,10 +71,24 @@ function App() {
       setOfflineError('This browser does not support offline storage.');
     }
 
+    const sync = () => {
+      try {
+        setReadings(loadReadings(window.localStorage).readings);
+        setLoaded(true);
+      } catch (error) {
+        setStorageError(error instanceof Error ? error.message : 'Storage unavailable.');
+        setLoaded(false);
+      }
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY || event.key === null) sync();
+    };
+    window.addEventListener('storage', onStorage);
     const updateConnection = () => setOnline(navigator.onLine);
     window.addEventListener('online', updateConnection);
     window.addEventListener('offline', updateConnection);
     return () => {
+      window.removeEventListener('storage', onStorage);
       window.removeEventListener('online', updateConnection);
       window.removeEventListener('offline', updateConnection);
     };
@@ -87,11 +102,12 @@ function App() {
     return [...groups.entries()].sort(([a], [b]) => b.localeCompare(a));
   }, [readings]);
 
-  function persist(next: Reading[], successMessage: string) {
-    if (!loaded) return false;
+  async function persist(change: Parameters<typeof mutateReadings>[1], successMessage: string) {
+    if (!loaded || busy.current) return false;
+    busy.current = true;
+    setSaving(true);
     try {
-      const snapshot = saveReadings(window.localStorage, next, savedRaw.current);
-      savedRaw.current = snapshot.raw;
+      const snapshot = await mutateReadings(window.localStorage, change);
       setReadings(snapshot.readings);
       setMessage(successMessage);
       setStorageError('');
@@ -100,51 +116,42 @@ function App() {
       setMessage('');
       setStorageError(error instanceof Error ? error.message : 'Your reading could not be saved on this device.');
       return false;
+    } finally {
+      busy.current = false;
+      setSaving(false);
     }
   }
 
-  function submitReading(event: FormEvent<HTMLFormElement>) {
+  async function submitReading(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!loaded) return;
-
+    if (!loaded || busy.current) return;
     const temperature = parseTemperature(draft.temperature);
     if (temperature === null) return;
-
-    const existing = readings.find((reading) => reading.id === editingId);
-    const reading: Reading = {
-      id: existing?.id ?? createId(),
-      ...draft,
-      temperature,
-      recordedAt: new Date().toISOString(),
-    };
-    const next = existing
-      ? readings.map((item) => item.id === editingId ? reading : item)
-      : [...readings, reading];
-
-    if (!persist(next, existing ? 'Reading updated on this device.' : 'Reading saved on this device.')) return;
-    setEditingId(null);
-    setDraft({ date: todayString(), temperature: '36.8', note: '' });
+    const values = { ...draft, temperature };
+    const base = editBase.current;
+    if (!await persist(base ? { kind: 'edit', base, values } : { kind: 'create', values }, base ? 'Reading updated on this device.' : 'Reading saved on this device.')) return;
+    cancelEdit(false);
   }
 
   function editReading(reading: Reading) {
+    if (busy.current) return;
+    editBase.current = reading;
     setEditingId(reading.id);
     setDraft({ date: reading.date, temperature: String(reading.temperature), note: reading.note });
     setMessage('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function deleteReading(id: string) {
-    if (!persist(readings.filter((reading) => reading.id !== id), 'Reading deleted from this device.')) return;
-    if (editingId === id) {
-      setEditingId(null);
-      setDraft({ date: todayString(), temperature: '36.8', note: '' });
-    }
+  async function deleteReading(reading: Reading) {
+    if (!await persist({ kind: 'delete', base: reading }, 'Reading deleted from this device.')) return;
+    if (editingId === reading.id) cancelEdit(false);
   }
 
-  function cancelEdit() {
+  function cancelEdit(clearMessage = true) {
+    editBase.current = null;
     setEditingId(null);
     setDraft({ date: todayString(), temperature: '36.8', note: '' });
-    setMessage('');
+    if (clearMessage) setMessage('');
   }
 
   return (
@@ -169,6 +176,7 @@ function App() {
                     type="number"
                     inputMode="decimal"
                     step="any"
+                    disabled={saving}
                     required
                     value={draft.temperature}
                     onChange={(event) => setDraft({ ...draft, temperature: event.target.value })}
@@ -182,6 +190,7 @@ function App() {
                   <input
                     aria-label="Reading date"
                     type="date"
+                    disabled={saving}
                     required
                     value={draft.date}
                     onChange={(event) => setDraft({ ...draft, date: event.target.value })}
@@ -193,6 +202,7 @@ function App() {
             <FormField className="note-field" label={<>A note, if you like <small>OPTIONAL</small></>}>
               <textarea
                 aria-label="Optional note"
+                disabled={saving}
                 rows={2}
                 maxLength={500}
                 placeholder="Anything you want to remember…"
@@ -203,8 +213,8 @@ function App() {
             {storageError && <Alert tone="error">Your diary could not be opened or saved: {storageError} Please check your browser storage settings; your existing data has not been replaced.</Alert>}
             {message && <Alert tone="success"><Check size={15} /> {message}</Alert>}
             <div className="form-actions">
-              {editingId && <Button variant="secondary" type="button" onClick={cancelEdit}><X size={15} /> Cancel</Button>}
-              <Button className="save-reading" type="submit" disabled={!loaded}>
+              {editingId && <Button variant="secondary" type="button" onClick={() => cancelEdit()} disabled={saving}><X size={15} /> Cancel</Button>}
+              <Button className="save-reading" type="submit" disabled={!loaded || saving}>
                 {editingId ? <Check size={16} /> : <Plus size={16} />}
                 {editingId ? 'Save correction' : 'Save reading'}
               </Button>
@@ -235,8 +245,8 @@ function App() {
                     {reading.note && <p>{reading.note}</p>}
                   </div>
                   <div className="reading-actions">
-                    <button className="reading-action" type="button" aria-label={`Edit reading ${displayTemperature(reading.temperature)} degrees`} onClick={() => editReading(reading)}><Pencil size={16} /></button>
-                    <button className="reading-action delete-action" type="button" aria-label={`Delete reading ${displayTemperature(reading.temperature)} degrees`} onClick={() => deleteReading(reading.id)}><Trash2 size={16} /></button>
+                    <button className="reading-action" type="button" aria-label={`Edit reading ${displayTemperature(reading.temperature)} degrees`} disabled={saving} onClick={() => editReading(reading)}><Pencil size={16} /></button>
+                    <button className="reading-action delete-action" type="button" aria-label={`Delete reading ${displayTemperature(reading.temperature)} degrees`} disabled={saving} onClick={() => deleteReading(reading)}><Trash2 size={16} /></button>
                   </div>
                 </article>
               ))}

@@ -1,4 +1,4 @@
-import { isReadingList, STORAGE_KEY } from './readings';
+import { createId, isReadingList, STORAGE_KEY } from './readings';
 import type { Reading } from './readings';
 
 type StoragePort = Pick<Storage, 'getItem' | 'setItem'>;
@@ -20,4 +20,30 @@ export function saveReadings(storage: StoragePort, next: Reading[], expectedRaw:
   const raw = JSON.stringify(next);
   storage.setItem(STORAGE_KEY, raw);
   return { readings: next, raw };
+}
+
+export type ReadingValues = Pick<Reading, 'date' | 'temperature' | 'note'>;
+export type ReadingChange = { kind: 'create'; values: ReadingValues } | { kind: 'edit'; base: Reading; values: ReadingValues } | { kind: 'delete'; base: Reading };
+
+export function applyChange(readings: Reading[], change: ReadingChange, idFactory = createId, now = () => new Date().toISOString()): Reading[] {
+  if (new Set(readings.map(r => r.id)).size !== readings.length) throw new Error('Duplicate saved reading IDs. Original data retained.');
+  if (change.kind === 'create') {
+    const id = idFactory();
+    if (readings.some(r => r.id === id)) throw new Error('Reading ID already exists. Please retry.');
+    return [...readings, { ...change.values, id, recordedAt: now() }];
+  }
+  const current = readings.find(r => r.id === change.base.id);
+  const base = change.base;
+  if (!current || current.date !== base.date || current.recordedAt !== base.recordedAt || current.temperature !== base.temperature || current.note !== base.note) {
+    throw new Error('This reading changed in another window. Cancel the edit and review the latest reading before retrying.');
+  }
+  return change.kind === 'delete' ? readings.filter(r => r.id !== base.id) : readings.map(r => r.id === base.id ? { ...r, ...change.values } : r);
+}
+
+export async function mutateReadings(storage: StoragePort, change: ReadingChange): Promise<ReadingSnapshot> {
+  if (!navigator.locks) throw new Error('This browser does not support safe coordinated diary writes. Use a supported browser.');
+  return navigator.locks.request(STORAGE_KEY, () => {
+    const snapshot = loadReadings(storage);
+    return saveReadings(storage, applyChange(snapshot.readings, change), snapshot.raw);
+  });
 }
