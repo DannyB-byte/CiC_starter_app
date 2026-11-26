@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chemo-in-comfort-v2';
+﻿const CACHE_NAME = 'chemo-in-comfort-v3';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -29,11 +29,21 @@ self.addEventListener('message', (event) => {
     }
   });
   const cacheAssets = caches.open(CACHE_NAME)
-    .then((cache) => cache.addAll(urls))
+    .then(async (cache) => {
+      for (const url of urls) {
+        try {
+          await cache.add(url);
+        } catch (error) {
+          throw new Error(
+            `Failed to cache ${url}: ${error.name}: ${error.message}`
+          );
+        }
+      }
+    })
     .then(() => event.ports[0]?.postMessage({ type: 'CACHE_READY' }))
     .catch((error) => {
       console.error('Unable to cache app files for offline use.', error);
-      event.ports[0]?.postMessage({ type: 'CACHE_ERROR', message: 'App files could not be saved for offline use.' });
+      event.ports[0]?.postMessage({ type: 'CACHE_ERROR', message: String(error) });
     });
 
   event.waitUntil(cacheAssets);
@@ -67,3 +77,4 @@ self.addEventListener('fetch', (event) => {
     }
   })());
 });
+
