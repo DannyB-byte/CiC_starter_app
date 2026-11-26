@@ -9,7 +9,7 @@ export function useOfflineStatus() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       void (async () => {
-        await navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+        await navigator.serviceWorker.register('/sw.js');
         const registration = await navigator.serviceWorker.ready;
         if (!registration.active) throw new Error('The offline worker did not become active.');
         await cacheLoadedAssets(registration.active);
