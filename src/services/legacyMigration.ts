@@ -1,6 +1,6 @@
 import { STORAGE_KEY } from '../domain/readings';
 import type { Reading } from '../domain/readings';
-import { listEntries } from './trackerStore';
+import { listLegacyEntries } from './legacyTrackerStore';
 import type { Entry } from './trackerStore';
 import { patientTransaction, validReading, validEntry } from './patientDatabase';
 
@@ -24,7 +24,7 @@ export function validateLegacySnapshot(readings: unknown, entries: unknown): Leg
 export async function readLegacySnapshot(): Promise<LegacySnapshot> {
   const raw = localStorage.getItem(STORAGE_KEY);
   const readings: unknown = raw === null ? [] : JSON.parse(raw);
-  const entries = await listEntries();
+  const entries = await listLegacyEntries();
   if (localStorage.getItem(STORAGE_KEY) !== raw) {
     throw new Error('Legacy readings changed during snapshot. Retry after stopping writers.');
   }

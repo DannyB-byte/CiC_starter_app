@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { STORAGE_KEY, parseTemperature, todayString } from '../../domain/readings';
+import { parseTemperature, todayString } from '../../domain/readings';
 import type { Reading, ReadingDraft } from '../../domain/readings';
-import { loadReadings, mutateReadings } from '../../domain/readingRepository';
+import type { ReadingChange } from '../../domain/readingRepository';
+import { listReadings, changeReading } from '../../services/patientStore';
 
 export function useDiary() {
   const [readings, setReadings] = useState<Reading[]>([]);
@@ -15,29 +16,20 @@ export function useDiary() {
   const [draft, setDraft] = useState<ReadingDraft>({ date: todayString(), temperature: '', note: '' });
   const [message, setMessage] = useState('');
   useEffect(() => {
-    try {
-      const snapshot = loadReadings(window.localStorage);
-      setReadings(snapshot.readings);
-      setLoaded(true);
-    } catch (error) {
-      setStorageError(error instanceof Error ? error.message : 'Your saved readings could not be opened.');
-    }
-
+    let active = true;
     const sync = () => {
-      try {
-        setReadings(loadReadings(window.localStorage).readings);
-        setLoaded(true);
-        setStorageError('');
-      } catch (error) {
-        setStorageError(error instanceof Error ? error.message : 'Storage unavailable.');
-        setLoaded(false);
-      }
+      void listReadings().then(rows => {
+        if (active) { setReadings(rows); setLoaded(true); setStorageError(''); }
+      }).catch(error => {
+        if (active) { setLoaded(false); setStorageError(error instanceof Error ? error.message : 'Storage unavailable.'); }
+      });
     };
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY || event.key === null) sync();
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    const channel = new BroadcastChannel('cic-patient-changes');
+    channel.onmessage = sync;
+    sync();
+    window.addEventListener('focus', sync);
+    window.addEventListener('cic-records-restored', sync);
+    return () => { active = false; channel.close(); window.removeEventListener('focus', sync); window.removeEventListener('cic-records-restored', sync); };
   }, []);
 
   const groupedReadings = useMemo(() => {
@@ -50,13 +42,13 @@ export function useDiary() {
     return [...groups.entries()].sort(([a], [b]) => b.localeCompare(a));
   }, [readings]);
 
-  async function persist(change: Parameters<typeof mutateReadings>[1], successMessage: string) {
+  async function persist(change: ReadingChange, successMessage: string) {
     if (!loaded || busy.current) return false;
     busy.current = true;
     setSaving(true);
     try {
-      const snapshot = await mutateReadings(window.localStorage, change);
-      setReadings(snapshot.readings);
+      await changeReading(change);
+      setReadings(await listReadings());
       setMessage(successMessage);
       setStorageError('');
       return true;

@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Button, PageHeader } from '../../components/ui';
-import { loadReadings } from '../../domain/readingRepository';
-import { STORAGE_KEY, isReadingList, isCalendarDate } from '../../domain/readings';
-import { listEntries, mergeEntries } from '../../services/trackerStore';
+import { patientSnapshot, mergePatientSnapshot } from '../../services/patientStore';
+import { isReadingList, isCalendarDate } from '../../domain/readings';
 import type { Entry } from '../../services/trackerStore';
 import type { Reading } from '../../domain/readings';
 import { trackers } from '../tracking/definitions';
 type Backup = { version: 1; readings: Reading[]; entries: Entry[] };
-async function snapshot(): Promise<Backup> { return {version:1, readings:loadReadings(localStorage).readings, entries:await listEntries()}; }
+async function snapshot(): Promise<Backup> { return {version:1, ...await patientSnapshot()}; }
 function validEntries(value: unknown): value is Entry[] {
  return Array.isArray(value) && value.every(e=>e && typeof e.id==='string' && e.id.length>0 && typeof e.date==='string' && isCalendarDate(e.date) && trackers.some(t=>t.id===e.kind) && e.values && typeof e.values==='object' && !Array.isArray(e.values) && Object.values(e.values).every(v=>typeof v==='string'));
 }
@@ -22,6 +21,6 @@ export function Reports(){
 export function SettingsPage(){
  const [message,setMessage]=useState(''); const [error,setError]=useState(''); const [busy,setBusy]=useState(false);
  async function run(action:()=>Promise<void>){setBusy(true);setError('');setMessage('');try{await action();}catch(e){setError(e instanceof Error?e.message:'Operation failed.');}finally{setBusy(false);}}
- async function restore(file:File){if(file.size>10*1024*1024)throw new Error('Backup exceeds the 10 MiB import limit.'); const raw:unknown=JSON.parse(await file.text()); if(!raw||typeof raw!=='object')throw new Error('Invalid backup.'); const b=raw as Partial<Backup>; if(b.version!==1||!isReadingList(b.readings)||!validEntries(b.entries))throw new Error('Invalid backup. No records changed.'); const readings=b.readings; const entries=b.entries; if(!navigator.locks)throw new Error('Safe restore is unavailable in this browser.'); await navigator.locks.request(STORAGE_KEY,async()=>{const existing=loadReadings(localStorage).readings; const ids=new Set(existing.map(r=>r.id)); const merged=[...existing]; for(const r of readings){if(!ids.has(r.id)){merged.push(r);ids.add(r.id);}} await mergeEntries(entries); localStorage.setItem(STORAGE_KEY,JSON.stringify(merged));}); setMessage('Backup merged. Existing records kept. Reload to refresh the diary.'); }
+ async function restore(file:File){if(file.size>10*1024*1024)throw new Error('Backup exceeds the 10 MiB import limit.'); const raw:unknown=JSON.parse(await file.text()); if(!raw||typeof raw!=='object')throw new Error('Invalid backup.'); const b=raw as Partial<Backup>; if(b.version!==1||!isReadingList(b.readings)||!validEntries(b.entries))throw new Error('Invalid backup. No records changed.'); const readings=b.readings; const entries=b.entries; await mergePatientSnapshot({readings,entries}); window.dispatchEvent(new Event('cic-records-restored')); setMessage('Backup merged. Existing records kept. Reload to refresh the diary.'); }
  return <div className="diary-content tracking"><PageHeader eyebrow="YOUR PRIVACY" title="Settings"><p>Records stay in this browser. Clearing browser data can remove them. Anyone with access to your unlocked device may be able to read them.</p></PageHeader><section className="reading-form-card"><h2>Backup and recovery</h2><p>Backup files contain sensitive information in plain text. Keep them somewhere private. Restoring merges records by ID and keeps existing entries.</p><Button disabled={busy} onClick={()=>void run(async()=>{download(JSON.stringify(await snapshot(),null,2),'cic-backup.json','application/json');setMessage('Backup prepared.');})}>Export backup</Button><label>Restore backup<input disabled={busy} type="file" accept=".json,application/json" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void run(()=>restore(file));}}/></label><p>To install, use your browser’s Add to Home Screen or Install app option when available.</p><p>This diary is not monitored by a clinical team and does not provide medical advice or alerts.</p>{message&&<p role="status">{message}</p>}{error&&<p role="alert">{error}</p>}</section></div>;
 }
