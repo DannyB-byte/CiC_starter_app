@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 test("Application loads", async ({ page }) => {
-  const response = await page.goto("/");
+  const response = await page.goto("/#diary");
   expect(response?.ok()).toBeTruthy();
   await expect(page.locator("body")).toBeVisible();
   await expect(page.getByRole("heading", { name: "One moment at a time." })).toBeVisible();
@@ -15,14 +15,14 @@ test("No uncaught JavaScript errors", async ({ page }) => {
     errors.push(error.message);
   });
 
-  await page.goto("/");
+  await page.goto("/#diary");
   await expect(page.getByRole("heading", { name: "One moment at a time." })).toBeVisible();
 
   expect(errors).toEqual([]);
 });
 
 test("No horizontal overflow", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/#diary");
   await expect(page.getByRole("heading", { name: "One moment at a time." })).toBeVisible();
 
   await expect.poll(async () => {
@@ -33,7 +33,7 @@ test("No horizontal overflow", async ({ page }) => {
 });
 
 test("Accessibility audit", async ({ page }, testInfo) => {
-  await page.goto("/");
+  await page.goto("/#diary");
   await expect(page.getByRole("heading", { name: "One moment at a time." })).toBeVisible();
 
   await expect(page.getByRole("button", { name: "Save reading" })).toBeEnabled();

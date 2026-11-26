@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('same-day readings survive reload and can be corrected and deleted offline', async ({ page, context }) => {
-  await page.goto('/');
+  await page.goto('/#diary');
   await expect(page.getByRole('heading', { name: 'One moment at a time.' })).toBeVisible();
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null);

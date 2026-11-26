@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('temperature diary accepts unrestricted finite decimal readings', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#diary');
   const input = page.getByLabel('Temperature in degrees Celsius');
   await expect(input).toHaveValue('');
   await page.getByRole('button', { name: 'Save reading' }).click();

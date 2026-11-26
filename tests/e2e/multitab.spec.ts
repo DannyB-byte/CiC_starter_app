@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 test('concurrent tabs retain both readings and reject stale edits', async ({ page, context }) => {
-  await page.goto('/');
+  await page.goto('/#diary');
   const other = await context.newPage();
-  await other.goto('/');
+  await other.goto('/#diary');
   for (const [tab, value] of [[page, '37.2'], [other, '38.4']] as const) {
     await tab.getByLabel('Temperature in degrees Celsius').fill(value);
   }

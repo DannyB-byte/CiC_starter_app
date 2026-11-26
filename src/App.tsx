@@ -1,3 +1,5 @@
+import { Dashboard } from './features/home/Dashboard';
+import { usePage } from './navigation';
 import { LockKeyhole } from 'lucide-react';
 import AppShell from './components/AppShell';
 import { PageHeader } from './components/ui';
@@ -7,10 +9,12 @@ import { useDiary } from './features/diary/useDiary';
 import { useOfflineStatus } from './hooks/useOfflineStatus';
 
 function App() {
+  const page = usePage();
   const diary = useDiary();
   const offline = useOfflineStatus();
   return (
-    <AppShell {...offline}>
+    <AppShell {...offline} page={page}>
+      {page === 'home' ? <Dashboard {...diary} /> : (
       <div className="diary-content">
         <PageHeader eyebrow="YOUR PERSONAL DIARY" title="One moment at a time.">
           <p>Keep a simple temperature reading or note for yourself. Nothing is shared unless you choose.</p>
@@ -19,6 +23,7 @@ function App() {
         <ReadingHistory {...diary} />
         <footer className="diary-footer"><LockKeyhole size={14} /><span>Your diary stays on this device. Choose what to share at your appointment.</span></footer>
       </div>
+      )}
     </AppShell>
   );
 }

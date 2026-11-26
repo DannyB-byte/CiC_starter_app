@@ -27,6 +27,7 @@ export function useDiary() {
       try {
         setReadings(loadReadings(window.localStorage).readings);
         setLoaded(true);
+        setStorageError('');
       } catch (error) {
         setStorageError(error instanceof Error ? error.message : 'Storage unavailable.');
         setLoaded(false);
@@ -42,7 +43,9 @@ export function useDiary() {
   const groupedReadings = useMemo(() => {
     const groups = new Map<string, Reading[]>();
     for (const reading of [...readings].sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))) {
-      groups.set(reading.date, [...(groups.get(reading.date) ?? []), reading]);
+      const group = groups.get(reading.date);
+      if (group) group.push(reading);
+      else groups.set(reading.date, [reading]);
     }
     return [...groups.entries()].sort(([a], [b]) => b.localeCompare(a));
   }, [readings]);
@@ -84,7 +87,7 @@ export function useDiary() {
     setEditingId(reading.id);
     setDraft({ date: reading.date, temperature: String(reading.temperature), note: reading.note });
     setMessage('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   }
 
   async function deleteReading(reading: Reading) {
