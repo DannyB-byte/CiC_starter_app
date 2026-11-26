@@ -1,3 +1,4 @@
+import { Reports, SettingsPage } from './features/records/Records';
 import { Tracking } from './features/tracking/Tracking';
 import { Dashboard } from './features/home/Dashboard';
 import { usePage } from './navigation';
@@ -15,7 +16,7 @@ function App() {
   const offline = useOfflineStatus();
   return (
     <AppShell {...offline} page={page}>
-      {page === 'home' ? <Dashboard {...diary} /> : page === 'tracking' ? <Tracking /> : (
+      {page === 'home' ? <Dashboard {...diary} /> : page === 'tracking' ? <Tracking /> : page === 'reports' ? <Reports /> : page === 'settings' ? <SettingsPage /> : (
       <div className="diary-content">
         <PageHeader eyebrow="YOUR PERSONAL DIARY" title="One moment at a time.">
           <p>Keep a simple temperature reading or note for yourself. Nothing is shared unless you choose.</p>

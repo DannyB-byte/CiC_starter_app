@@ -21,3 +21,7 @@ async function transaction<T>(mode: IDBTransactionMode, operation: (store: IDBOb
 export const listEntries = () => transaction('readonly', store => store.getAll()) as Promise<Entry[]>;
 export const saveEntry = (entry: Entry) => transaction('readwrite', store => store.put(entry));
 export const deleteEntry = (id: string) => transaction('readwrite', store => store.delete(id));
+
+export async function mergeEntries(entries: Entry[]): Promise<void> {
+ const db=await open(); try { await new Promise<void>((resolve,reject)=>{const tx=db.transaction('entries','readwrite');const store=tx.objectStore('entries');const request=store.getAllKeys();request.onsuccess=()=>{const ids=new Set(request.result);for(const entry of entries){if(!ids.has(entry.id)){store.add(entry);ids.add(entry.id);}}};tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error??new Error('Restore failed.'));tx.onerror=()=>reject(tx.error??new Error('Restore failed.'));}); } finally {db.close();}
+}

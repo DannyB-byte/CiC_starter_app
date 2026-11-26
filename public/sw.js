@@ -1,9 +1,10 @@
-﻿const CACHE_NAME = 'chemo-in-comfort-v3';
+﻿const CACHE_NAME = 'chemo-in-comfort-v4';
+const PRECACHE = ['./', './index.html'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(['/', '/index.html']))
+      .then((cache) => cache.addAll(PRECACHE))
       .then(() => self.skipWaiting())
   );
 });
@@ -70,7 +71,7 @@ self.addEventListener('fetch', (event) => {
       const cached = await caches.match(request, { ignoreVary: true });
       if (cached) return cached;
       if (request.mode === 'navigate') {
-        const appShell = await caches.match('/index.html');
+        const appShell = await caches.match(new URL('index.html', self.registration.scope).href);
         if (appShell) return appShell;
       }
       return Response.error();

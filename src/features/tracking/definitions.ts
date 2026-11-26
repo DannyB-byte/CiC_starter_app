@@ -8,5 +8,6 @@ export const trackers: {id:string; title:string; fields:Field[]}[] = [
  {id:'activity',title:'Activity',fields:[{label:'Activity type'},{label:'Duration (minutes)',type:'number'}]},
  {id:'mood',title:'Mood',fields:[{label:'Mood',options:['Very low','Low','Neutral','Good','Very good']}]},
  {id:'bowel',title:'Bowel movements',fields:[{label:'Bristol stool type',options:['1 — Separate hard lumps','2 — Lumpy sausage','3 — Sausage with cracks','4 — Smooth and soft','5 — Soft blobs','6 — Mushy pieces','7 — Watery']}]},
+ {id:'appointment',title:'Appointments',fields:[{label:'Appointment details'},{label:'Time and location'}]},
  {id:'sickness',title:'Sickness',fields:[{label:'Episodes',type:'number'},{label:'Observations'}]}
 ];

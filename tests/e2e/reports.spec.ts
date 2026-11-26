@@ -1,0 +1,2 @@
+import { test, expect } from '@playwright/test';
+test('reports and backup settings are reachable', async ({page})=>{await page.goto('/#reports');await expect(page.getByRole('heading',{name:'Patient reports'})).toBeVisible();await expect(page.getByText('No records in this period.')).toBeVisible();await page.goto('/#settings');await expect(page.getByRole('heading',{name:'Settings'})).toBeVisible();const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export backup'}).click();expect((await download).suggestedFilename()).toBe('cic-backup.json');});

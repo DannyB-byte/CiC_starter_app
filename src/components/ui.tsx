@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 
 export function BrandLogo({ monogram = false, className = '' }: { monogram?: boolean; className?: string }) {
-  return <img className={className} src={monogram ? '/brand/cic-monogram.svg' : '/brand/cic-logo.svg'} alt="" />;
+  return <img className={className} src={`${import.meta.env.BASE_URL}brand/${monogram ? 'cic-monogram.svg' : 'cic-logo.svg'}`} alt="" />;
 }
 export function Button({ variant = 'primary', className = '', type = 'button', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' }) {
   return <button {...props} type={type} className={`button ${variant} ${className}`} />;

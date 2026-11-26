@@ -7,7 +7,7 @@ test('brand images load without external fonts', async ({ page }) => {
   });
   await page.goto('/#diary');
   await expect(page.getByRole('button', { name: 'Save reading' })).toBeEnabled();
-  const logos = page.locator('img[src^="/brand/"]:visible');
+  const logos = page.locator('img.cic-header-logo:visible, img.cic-empty-logo:visible');
   expect(await logos.count()).toBeGreaterThan(0);
   for (const logo of await logos.all()) {
     await expect.poll(() => logo.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
