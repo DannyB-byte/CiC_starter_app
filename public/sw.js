@@ -1,0 +1,69 @@
+const CACHE_NAME = 'chemo-in-comfort-v2';
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(['/', '/index.html']))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys
+        .filter((key) => key.startsWith('chemo-in-comfort-') && key !== CACHE_NAME)
+        .map((key) => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type !== 'CACHE_URLS' || !Array.isArray(event.data.urls)) return;
+
+  const urls = event.data.urls.filter((url) => {
+    try {
+      return new URL(url, self.location.origin).origin === self.location.origin;
+    } catch {
+      return false;
+    }
+  });
+  const cacheAssets = caches.open(CACHE_NAME)
+    .then((cache) => cache.addAll(urls))
+    .then(() => event.ports[0]?.postMessage({ type: 'CACHE_READY' }))
+    .catch((error) => {
+      console.error('Unable to cache app files for offline use.', error);
+      event.ports[0]?.postMessage({ type: 'CACHE_ERROR', message: 'App files could not be saved for offline use.' });
+    });
+
+  event.waitUntil(cacheAssets);
+});
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+
+  event.respondWith((async () => {
+    if (request.destination !== 'document') {
+      const cachedAsset = await caches.match(request, { ignoreVary: true });
+      if (cachedAsset) return cachedAsset;
+    }
+
+    try {
+      const response = await fetch(request);
+      if (response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch {
+      const cached = await caches.match(request, { ignoreVary: true });
+      if (cached) return cached;
+      if (request.mode === 'navigate') {
+        const appShell = await caches.match('/index.html');
+        if (appShell) return appShell;
+      }
+      return Response.error();
+    }
+  })());
+});
