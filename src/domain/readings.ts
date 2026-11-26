@@ -30,12 +30,23 @@ export function formatTime(date: string) {
   return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(date));
 }
 
+export function isCalendarDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value.startsWith('0000')) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+export function isRecordedTimestamp(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{3})?Z$/.test(value)
+    && isCalendarDate(value.slice(0, 10)) && Number.isFinite(Date.parse(value));
+}
+
 export function isReadingList(value: unknown): value is Reading[] {
   return Array.isArray(value) && value.every((item) =>
     typeof item === 'object' && item !== null &&
     typeof item.id === 'string' &&
-    typeof item.date === 'string' &&
-    typeof item.recordedAt === 'string' &&
+    typeof item.date === 'string' && isCalendarDate(item.date) &&
+    typeof item.recordedAt === 'string' && isRecordedTimestamp(item.recordedAt) &&
     typeof item.temperature === 'number' && Number.isFinite(item.temperature) &&
     typeof item.note === 'string'
   );

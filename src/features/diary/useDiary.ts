@@ -12,7 +12,7 @@ export function useDiary() {
   const editBase = useRef<Reading | null>(null);
   const [storageError, setStorageError] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<ReadingDraft>({ date: todayString(), temperature: '36.8', note: '' });
+  const [draft, setDraft] = useState<ReadingDraft>({ date: todayString(), temperature: '', note: '' });
   const [message, setMessage] = useState('');
   useEffect(() => {
     try {
@@ -95,7 +95,7 @@ export function useDiary() {
   function cancelEdit(clearMessage = true) {
     editBase.current = null;
     setEditingId(null);
-    setDraft({ date: todayString(), temperature: '36.8', note: '' });
+    setDraft({ date: todayString(), temperature: '', note: '' });
     if (clearMessage) setMessage('');
   }
 
