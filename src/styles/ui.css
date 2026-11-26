@@ -1,0 +1,6 @@
+.cic-card { background: var(--cic-surface); border-radius: 11px; }
+.button.danger { background: var(--cic-danger); color: var(--cic-background); min-height: 44px; }
+.cic-info { color: var(--cic-ivory); }
+.cic-dialog { color: var(--cic-ivory); background: var(--cic-surface); border: 1px solid var(--cic-border); border-radius: 12px; padding: 24px; max-width: min(440px, 90vw); }
+.cic-dialog::backdrop { background: rgb(0 0 0 / 70%); }
+.cic-dialog h2 { margin-bottom: 16px; }

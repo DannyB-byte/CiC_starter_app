@@ -1,5 +1,8 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, Check, ChevronDown, LockKeyhole, Pencil, Plus, Thermometer, Trash2, WifiOff, X } from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, LockKeyhole, Pencil, Plus, Thermometer, Trash2, X } from 'lucide-react';
+
+import AppShell from './components/AppShell';
+import { Alert, Badge, Button, Card, EmptyState, FormField, PageHeader } from './components/ui';
 
 type Reading = {
   id: string;
@@ -181,26 +184,13 @@ function App() {
   }
 
   return (
-    <main className="diary-app">
-      <header className="diary-header">
-        <a className="diary-brand" href="/" aria-label="Chemo in Comfort home">
-          <img className="cic-header-logo" src="/brand/cic-logo.svg" alt="" />
-          
-        </a>
-        <div className={`connection-status ${online && !offlineError ? '' : 'offline'}`} role="status" title={offlineError}>
-          {online ? <LockKeyhole size={15} /> : <WifiOff size={15} />}
-          <span>{online ? offlineError ? 'Offline setup unavailable' : offlineReady ? 'Private and ready offline' : 'Setting up offline diary…' : 'Offline · your diary is here'}</span>
-        </div>
-      </header>
-
+    <AppShell online={online} offlineReady={offlineReady} offlineError={offlineError}>
       <div className="diary-content">
-        <section className="diary-intro">
-          <span className="diary-eyebrow"><span /> YOUR PERSONAL DIARY</span>
-          <h1>One moment at a time.</h1>
+        <PageHeader eyebrow="YOUR PERSONAL DIARY" title="One moment at a time.">
           <p>Keep a simple temperature reading or note for yourself. Nothing is shared unless you choose.</p>
-        </section>
+        </PageHeader>
 
-        <section className="reading-form-card" aria-labelledby="form-title">
+        <Card className="reading-form-card" aria-labelledby="form-title">
           <div className="diary-section-heading">
             <div className="form-icon"><Thermometer size={19} /></div>
             <div><span className="diary-eyebrow">{editingId ? 'MAKE A CORRECTION' : 'A QUICK READING'}</span><h2 id="form-title">{editingId ? 'Edit this reading' : 'Add a temperature'}</h2></div>
@@ -208,8 +198,7 @@ function App() {
 
           <form onSubmit={submitReading}>
             <div className="reading-fields">
-              <label>
-                <span>Temperature</span>
+              <FormField label="Temperature">
                 <div className="temperature-input">
                   <input
                     aria-label="Temperature in degrees Celsius"
@@ -224,9 +213,8 @@ function App() {
                   />
                   <span>°C</span>
                 </div>
-              </label>
-              <label>
-                <span>Date</span>
+              </FormField>
+              <FormField label="Date">
                 <div className="date-input">
                   <CalendarDays size={16} />
                   <input
@@ -238,10 +226,9 @@ function App() {
                   />
                   <ChevronDown size={15} />
                 </div>
-              </label>
+              </FormField>
             </div>
-            <label className="note-field">
-              <span>A note, if you like <small>OPTIONAL</small></span>
+            <FormField className="note-field" label={<>A note, if you like <small>OPTIONAL</small></>}>
               <textarea
                 aria-label="Optional note"
                 rows={2}
@@ -250,32 +237,30 @@ function App() {
                 value={draft.note}
                 onChange={(event) => setDraft({ ...draft, note: event.target.value })}
               />
-            </label>
-            {storageError && <p className="diary-error" role="alert">Your diary could not be opened or saved: {storageError} Please check your browser storage settings; your existing data has not been replaced.</p>}
-            {message && <p className="diary-success" role="status"><Check size={15} /> {message}</p>}
+            </FormField>
+            {storageError && <Alert tone="error">Your diary could not be opened or saved: {storageError} Please check your browser storage settings; your existing data has not been replaced.</Alert>}
+            {message && <Alert tone="success"><Check size={15} /> {message}</Alert>}
             <div className="form-actions">
-              {editingId && <button className="button secondary" type="button" onClick={cancelEdit}><X size={15} /> Cancel</button>}
-              <button className="button primary save-reading" type="submit" disabled={!loaded || Boolean(storageError)}>
+              {editingId && <Button variant="secondary" type="button" onClick={cancelEdit}><X size={15} /> Cancel</Button>}
+              <Button className="save-reading" type="submit" disabled={!loaded || Boolean(storageError)}>
                 {editingId ? <Check size={16} /> : <Plus size={16} />}
                 {editingId ? 'Save correction' : 'Save reading'}
-              </button>
+              </Button>
             </div>
           </form>
-        </section>
+        </Card>
 
         <section className="readings-section" aria-labelledby="readings-title">
           <div className="readings-heading">
             <div><span className="diary-eyebrow">YOUR NOTES, YOURS ALONE</span><h2 id="readings-title">Past readings</h2></div>
-            <span className="reading-count">{readings.length} {readings.length === 1 ? 'reading' : 'readings'}</span>
+            <Badge>{readings.length} {readings.length === 1 ? 'reading' : 'readings'}</Badge>
           </div>
 
           {!loaded && !storageError && <p className="empty-readings">Opening your diary…</p>}
           {loaded && groupedReadings.length === 0 && (
-            <div className="empty-readings">
-              <img className="cic-empty-logo" src="/brand/cic-monogram.svg" alt="" />
-              <strong>Your diary is ready when you are.</strong>
+            <EmptyState title="Your diary is ready when you are.">
               <p>Your readings are saved only on this device.</p>
-            </div>
+            </EmptyState>
           )}
           {groupedReadings.map(([date, items]) => (
             <section className="reading-day" key={date} aria-label={formatDate(date)}>
@@ -299,7 +284,7 @@ function App() {
 
         <footer className="diary-footer"><LockKeyhole size={14} /><span>Your diary stays on this device. Choose what to share at your appointment.</span></footer>
       </div>
-    </main>
+    </AppShell>
   );
 }
 
