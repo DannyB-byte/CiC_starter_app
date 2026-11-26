@@ -4,48 +4,8 @@ import { CalendarDays, Check, ChevronDown, LockKeyhole, Pencil, Plus, Thermomete
 import AppShell from './components/AppShell';
 import { Alert, Badge, Button, Card, EmptyState, FormField, PageHeader } from './components/ui';
 
-type Reading = {
-  id: string;
-  date: string;
-  recordedAt: string;
-  temperature: number;
-  note: string;
-};
-
-type ReadingDraft = Pick<Reading, 'date' | 'temperature' | 'note'>;
-
-const STORAGE_KEY = 'chemo-in-comfort.readings.v1';
-
-function todayString() {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function createId() {
-  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-    .format(new Date(`${date}T12:00:00`));
-}
-
-function formatTime(date: string) {
-  return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(new Date(date));
-}
-
-function isReadingList(value: unknown): value is Reading[] {
-  return Array.isArray(value) && value.every((item) =>
-    typeof item === 'object' && item !== null &&
-    typeof item.id === 'string' &&
-    typeof item.date === 'string' &&
-    typeof item.recordedAt === 'string' &&
-    typeof item.temperature === 'number' &&
-    typeof item.note === 'string'
-  );
-}
+import { createId, displayTemperature, formatDate, formatTime, isReadingList, parseTemperature, STORAGE_KEY, todayString } from './domain/readings';
+import type { Reading, ReadingDraft } from './domain/readings';
 
 function cacheLoadedAssets(worker: ServiceWorker) {
   const origin = window.location.origin;
@@ -76,7 +36,7 @@ function App() {
   const [loaded, setLoaded] = useState(false);
   const [storageError, setStorageError] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<ReadingDraft>({ date: todayString(), temperature: 36.8, note: '' });
+  const [draft, setDraft] = useState<ReadingDraft>({ date: todayString(), temperature: '36.8', note: '' });
   const [message, setMessage] = useState('');
   const [online, setOnline] = useState(navigator.onLine);
   const [offlineReady, setOfflineReady] = useState(false);
@@ -147,10 +107,14 @@ function App() {
     event.preventDefault();
     if (!loaded || storageError) return;
 
+    const temperature = parseTemperature(draft.temperature);
+    if (temperature === null) return;
+
     const existing = readings.find((reading) => reading.id === editingId);
     const reading: Reading = {
       id: existing?.id ?? createId(),
       ...draft,
+      temperature,
       recordedAt: new Date().toISOString(),
     };
     const next = existing
@@ -159,12 +123,12 @@ function App() {
 
     if (!persist(next, existing ? 'Reading updated on this device.' : 'Reading saved on this device.')) return;
     setEditingId(null);
-    setDraft({ date: todayString(), temperature: 36.8, note: '' });
+    setDraft({ date: todayString(), temperature: '36.8', note: '' });
   }
 
   function editReading(reading: Reading) {
     setEditingId(reading.id);
-    setDraft({ date: reading.date, temperature: reading.temperature, note: reading.note });
+    setDraft({ date: reading.date, temperature: String(reading.temperature), note: reading.note });
     setMessage('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -173,13 +137,13 @@ function App() {
     if (!persist(readings.filter((reading) => reading.id !== id), 'Reading deleted from this device.')) return;
     if (editingId === id) {
       setEditingId(null);
-      setDraft({ date: todayString(), temperature: 36.8, note: '' });
+      setDraft({ date: todayString(), temperature: '36.8', note: '' });
     }
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setDraft({ date: todayString(), temperature: 36.8, note: '' });
+    setDraft({ date: todayString(), temperature: '36.8', note: '' });
     setMessage('');
   }
 
@@ -204,12 +168,10 @@ function App() {
                     aria-label="Temperature in degrees Celsius"
                     type="number"
                     inputMode="decimal"
-                    min="30"
-                    max="45"
-                    step="0.1"
+                    step="any"
                     required
                     value={draft.temperature}
-                    onChange={(event) => setDraft({ ...draft, temperature: Number(event.target.value) })}
+                    onChange={(event) => setDraft({ ...draft, temperature: event.target.value })}
                   />
                   <span>°C</span>
                 </div>
@@ -267,14 +229,14 @@ function App() {
               <h3>{formatDate(date)}</h3>
               {items.map((reading) => (
                 <article className="reading-item" key={reading.id}>
-                  <div className="reading-value"><Thermometer size={17} /><strong>{reading.temperature.toFixed(1)}°</strong><span>C</span></div>
+                  <div className="reading-value"><Thermometer size={17} /><strong>{displayTemperature(reading.temperature)}°</strong><span>C</span></div>
                   <div className="reading-details">
                     <span className="reading-time">{formatTime(reading.recordedAt)}</span>
                     {reading.note && <p>{reading.note}</p>}
                   </div>
                   <div className="reading-actions">
-                    <button className="reading-action" type="button" aria-label={`Edit reading ${reading.temperature.toFixed(1)} degrees`} onClick={() => editReading(reading)}><Pencil size={16} /></button>
-                    <button className="reading-action delete-action" type="button" aria-label={`Delete reading ${reading.temperature.toFixed(1)} degrees`} onClick={() => deleteReading(reading.id)}><Trash2 size={16} /></button>
+                    <button className="reading-action" type="button" aria-label={`Edit reading ${displayTemperature(reading.temperature)} degrees`} onClick={() => editReading(reading)}><Pencil size={16} /></button>
+                    <button className="reading-action delete-action" type="button" aria-label={`Delete reading ${displayTemperature(reading.temperature)} degrees`} onClick={() => deleteReading(reading.id)}><Trash2 size={16} /></button>
                   </div>
                 </article>
               ))}
