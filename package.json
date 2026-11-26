@@ -24,12 +24,9 @@
         "test:production": "npm run build && playwright test --config=playwright.production.config.ts"
     },
     "dependencies": {
-        "@supabase/supabase-js": "^2.57.4",
         "lucide-react": "^0.446.0",
         "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "react-router-dom": "^7.18.5",
-        "recharts": "^3.10.1"
+        "react-dom": "^18.3.1"
     },
     "devDependencies": {
         "@axe-core/playwright": "^4.14.1",
