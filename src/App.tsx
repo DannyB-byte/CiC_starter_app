@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, Check, ChevronDown, Leaf, LockKeyhole, Pencil, Plus, Thermometer, Trash2, WifiOff, X } from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, LockKeyhole, Pencil, Plus, Thermometer, Trash2, WifiOff, X } from 'lucide-react';
 
 type Reading = {
   id: string;
@@ -184,8 +184,8 @@ function App() {
     <main className="diary-app">
       <header className="diary-header">
         <a className="diary-brand" href="/" aria-label="Chemo in Comfort home">
-          <span className="diary-brand-mark"><Leaf size={19} /></span>
-          <span>CHEMO IN COMFORT<small>Dignity Through Treatment</small></span>
+          <img className="cic-header-logo" src="/brand/cic-logo.svg" alt="" />
+          
         </a>
         <div className={`connection-status ${online && !offlineError ? '' : 'offline'}`} role="status" title={offlineError}>
           {online ? <LockKeyhole size={15} /> : <WifiOff size={15} />}
@@ -272,7 +272,7 @@ function App() {
           {!loaded && !storageError && <p className="empty-readings">Opening your diary…</p>}
           {loaded && groupedReadings.length === 0 && (
             <div className="empty-readings">
-              <span className="empty-icon"><Leaf size={20} /></span>
+              <img className="cic-empty-logo" src="/brand/cic-monogram.svg" alt="" />
               <strong>Your diary is ready when you are.</strong>
               <p>Your readings are saved only on this device.</p>
             </div>

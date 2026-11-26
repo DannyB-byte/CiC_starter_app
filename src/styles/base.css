@@ -1,0 +1,7 @@
+* { box-sizing: border-box; }
+html { background: var(--cic-background); -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-width: 320px; background: var(--cic-background); color: var(--cic-ivory); font-family: system-ui, sans-serif; }
+button, a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--cic-champagne); outline-offset: 3px; }
+::selection { background: var(--cic-champagne); color: var(--cic-background); }

@@ -1,0 +1,19 @@
+:root {
+  color-scheme: dark;
+
+  --cic-background: #11120f;
+  --cic-surface: #1c1e19;
+  --cic-surface-raised: #252720;
+  --cic-input: #151711;
+  --cic-champagne: #d0c1a2;
+  --cic-ivory: #ede5d6;
+  --cic-muted: #b8b1a4;
+  --cic-border: #77796b;
+  --cic-divider: #393b31;
+  --cic-success: #a8c69f;
+  --cic-warning: #f0ca80;
+  --cic-danger: #ffaaaa;
+
+  background: var(--cic-background);
+  color: var(--cic-ivory);
+}
