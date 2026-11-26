@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -44,3 +43,93 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .mood-options button { min-height: 82px; }
   .page-wrap { overflow-x: hidden; }
  .sidebar { transform: translateX(-100%); transition: transform .25s ease; box-shadow: 10px 0 30px #0008; }.sidebar.open { transform: translateX(0); }.sidebar-backdrop { display: block; position: fixed; inset: 0; background: #0009; z-index: 19; border: 0; }.main-content { width: 100%; margin-left: 0; padding-bottom: 68px; }.topbar { height: 65px; padding: 0 20px; }.mobile-menu { display: grid; place-items: center; color: #c1b9ae; background: none; border: 0; padding: 4px; }.topbar .breadcrumb { margin-right: auto; margin-left: 13px; }.breadcrumb span, .breadcrumb svg { display: none; }.topbar-actions { gap: 14px; }.page-wrap { padding: 31px 17px 45px; }.page-heading { align-items: flex-start; flex-direction: column; gap: 18px; margin-bottom: 27px; }.page-heading h1 { font-size: 39px; }.page-heading p { font-size: 11px; }.page-heading .button { align-self: stretch; justify-content: center; }.card { padding: 20px; }.wellbeing-main { gap: 17px; }.score-ring { width: 95px; height: 95px; }.score-ring strong { font-size: 32px; }.wellbeing-main h2 { font-size: 23px; }.wellbeing-main p { font-size: 10px; }.mini-stat-row { gap: 8px; }.mini-stat { grid-template-columns: 15px 1fr; font-size: 9px; }.mini-stat strong { font-size: 10px; }.dashboard-grid { gap: 12px; }.mood-options { gap: 5px; }.mood-options button { width: 59px; min-height: 70px; font-size: 8px; }.mood-face { font-size: 20px; }.checkin-main { padding: 20px; }.question { padding: 42px 0 38px; }.question h2 { font-size: 27px; }.checkin-footer { gap: 12px; align-items: flex-end; }.checkin-footer .button { padding: 10px 11px; }.chart-wrap { height: 210px; margin-left: -27px; }.chart-card { min-height: 320px; }.observation-card { padding: 18px; }.journey-cycle-head { margin-top: 25px; }.journey-note { margin-top: 30px; }.mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 67px; z-index: 15; background: #0d0d0c; border-top: 1px solid #292824; justify-content: space-around; padding: 7px 8px 5px; }.mobile-nav .nav-item { flex-direction: column; justify-content: center; gap: 4px; padding: 5px 9px; min-height: 51px; font-size: 9px; }.mobile-nav .nav-item.active:before { display: none; }.mobile-nav .nav-item.active { background: transparent; color: #f5ecdf; }.mobile-nav .nav-item.active svg { color: #d9c5aa; }.mobile-nav .new-dot { position: absolute; top: 5px; right: 13px; }.generic-layout { gap: 12px; }.empty-note { padding: 25px; } }
+
+.diary-app { min-height: 100vh; color: #332f29; background: #f7f5f0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.diary-header { min-height: 75px; padding: 0 max(24px, calc((100% - 1040px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #fbfaf7; border-bottom: 1px solid #e8e4dc; }
+.diary-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: #3c493f; font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+.diary-brand-mark { width: 35px; height: 35px; display: grid; place-items: center; border: 1px solid #c8d0c4; border-radius: 50%; color: #70816f; }
+.diary-brand small { display: block; margin-top: 4px; color: #928c80; font: italic 12px Georgia, serif; letter-spacing: 0; }
+.connection-status { display: flex; align-items: center; gap: 8px; color: #72816e; font-size: 12px; }
+.connection-status.offline { color: #9b714d; }
+.diary-content { width: min(100% - 40px, 720px); margin: 0 auto; padding: 53px 0 38px; }
+.diary-intro { margin-bottom: 31px; }
+.diary-eyebrow { display: flex; align-items: center; gap: 8px; color: #8d887d; font-size: 10px; font-weight: 700; letter-spacing: .13em; }
+.diary-eyebrow > span { width: 6px; height: 6px; border-radius: 50%; background: #91a28e; }
+.diary-intro h1 { margin: 13px 0 9px; color: #363c34; font: 500 clamp(36px, 7vw, 48px)/1.08 Georgia, "Times New Roman", serif; letter-spacing: -.035em; }
+.diary-intro p { max-width: 525px; margin: 0; color: #77766f; font-size: 14px; line-height: 1.65; }
+.reading-form-card { padding: 25px 27px 22px; background: #fff; border: 1px solid #e8e4dc; border-radius: 13px; box-shadow: 0 9px 28px #34301d0a; }
+.diary-section-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+.form-icon { width: 40px; height: 40px; display: grid; place-items: center; color: #758672; background: #eff2eb; border-radius: 10px; }
+.diary-section-heading h2, .readings-heading h2 { margin: 4px 0 0; color: #373c34; font: 500 23px Georgia, "Times New Roman", serif; }
+.reading-fields { display: grid; grid-template-columns: .8fr 1.2fr; gap: 14px; }
+.reading-form-card label { display: block; color: #615f58; font-size: 12px; font-weight: 600; }
+.reading-form-card label > span { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.reading-form-card input, .reading-form-card textarea { width: 100%; min-width: 0; color: #3e403a; background: #fbfaf8; border: 1px solid #e3dfd6; border-radius: 7px; outline: none; font: inherit; }
+.reading-form-card input:focus, .reading-form-card textarea:focus { border-color: #8b9b84; box-shadow: 0 0 0 3px #8b9b841c; }
+.temperature-input, .date-input { height: 46px; display: flex; align-items: center; gap: 9px; padding: 0 12px; background: #fbfaf8; border: 1px solid #e3dfd6; border-radius: 7px; }
+.temperature-input:focus-within, .date-input:focus-within { border-color: #8b9b84; box-shadow: 0 0 0 3px #8b9b841c; }
+.temperature-input input, .date-input input { height: 100%; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.temperature-input input:focus, .date-input input:focus { box-shadow: none; }
+.temperature-input > span { color: #818078; font-size: 13px; }
+.date-input > svg { color: #8b8b80; flex: 0 0 auto; }
+.date-input > svg:last-child { width: 14px; }
+.note-field { margin-top: 17px; }
+.note-field label { margin-bottom: 8px; }
+.note-field small { color: #989388; font-size: 9px; font-weight: 500; letter-spacing: .1em; }
+.reading-form-card textarea { min-height: 76px; padding: 11px 12px; resize: vertical; font-size: 13px; }
+.reading-form-card textarea::placeholder { color: #a7a399; }
+.form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 17px; }
+.diary-app .button { min-height: 43px; padding: 0 16px; color: #6a675e; background: #fff; border: 1px solid #e1ddd5; border-radius: 7px; font-size: 12px; }
+.diary-app .button.primary { color: #fff; background: #788874; border-color: #788874; font-weight: 600; }
+.diary-app .button:disabled { opacity: .55; cursor: not-allowed; }
+.diary-app .button svg { width: 15px; }
+.diary-error, .diary-success { display: flex; align-items: flex-start; gap: 7px; margin: 12px 0 0; font-size: 12px; line-height: 1.5; }
+.diary-error { color: #a33e36; }
+.diary-success { color: #647d61; }
+.readings-section { margin-top: 37px; }
+.readings-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+.readings-heading h2 { margin-top: 5px; font-size: 26px; }
+.reading-count { padding: 6px 10px; color: #7f7b71; background: #ebe9e2; border-radius: 20px; font-size: 11px; }
+.reading-day { margin-bottom: 15px; padding: 5px 19px 0; background: #fff; border: 1px solid #e9e5dd; border-radius: 11px; }
+.reading-day h3 { margin: 13px 0 3px; color: #77766e; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+.reading-item { min-height: 72px; display: flex; align-items: center; gap: 14px; border-top: 1px solid #efede8; }
+.reading-value { min-width: 89px; display: flex; align-items: center; gap: 5px; color: #788874; }
+.reading-value strong { color: #44463f; font: 500 23px Georgia, serif; }
+.reading-value span { align-self: flex-end; margin-bottom: 18px; color: #89877e; font-size: 10px; }
+.reading-details { flex: 1; min-width: 0; }
+.reading-time { color: #8a877e; font-size: 11px; }
+.reading-details p { margin: 4px 0 0; overflow-wrap: anywhere; color: #5e6059; font-size: 12px; line-height: 1.45; }
+.reading-actions { display: flex; gap: 3px; }
+.reading-action { width: 40px; height: 40px; display: grid; place-items: center; color: #8b887e; background: transparent; border: 0; border-radius: 7px; cursor: pointer; }
+.reading-action:hover { color: #53644f; background: #f1f3ee; }
+.reading-action.delete-action:hover { color: #a3473b; background: #fbefed; }
+.empty-readings { min-height: 135px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #76766d; background: #fff; border: 1px solid #e9e5dd; border-radius: 11px; text-align: center; }
+.empty-readings strong { margin-top: 9px; color: #4a4b43; font: 500 18px Georgia, serif; }
+.empty-readings p { margin: 6px 0 0; font-size: 12px; }
+.empty-icon { color: #8a9b85; }
+.diary-footer { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; color: #8a877e; font-size: 11px; text-align: center; }
+.diary-footer svg { flex: 0 0 auto; color: #929e8a; }
+
+@media (max-width: 600px) {
+  .diary-header { min-height: 67px; padding: 0 17px; }
+  .diary-brand { font-size: 10px; }
+  .diary-brand-mark { width: 32px; height: 32px; }
+  .diary-brand small { font-size: 11px; }
+  .connection-status { gap: 5px; font-size: 10px; }
+  .connection-status svg { width: 13px; }
+  .diary-content { width: calc(100% - 32px); padding: 37px 0 28px; }
+  .diary-intro { margin-bottom: 23px; }
+  .diary-intro h1 { font-size: 37px; }
+  .diary-intro p { font-size: 13px; }
+  .reading-form-card { padding: 19px 17px 17px; }
+  .reading-fields { grid-template-columns: 1fr 1fr; gap: 9px; }
+  .date-input { gap: 5px; padding: 0 8px; }
+  .date-input input { font-size: 11px; }
+  .reading-day { padding: 4px 13px 0; }
+  .reading-item { gap: 8px; }
+  .reading-value { min-width: 75px; gap: 3px; }
+  .reading-value > svg { width: 15px; }
+  .reading-value strong { font-size: 20px; }
+  .reading-action { width: 36px; height: 44px; }
+  .diary-footer { align-items: flex-start; line-height: 1.5; }
+}
