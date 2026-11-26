@@ -125,3 +125,32 @@ export async function mergePatientSnapshot(snapshot: LegacySnapshot): Promise<vo
   });
   notifyPatientChange();
 }
+
+export type PatientPageToken = { key: IDBValidKey; id: IDBValidKey };
+export type PatientPage<T> = { rows: T[]; next: PatientPageToken | null };
+async function indexedPage<T>(store: 'readings' | 'entries', index: string, valid: (value: unknown) => value is T, limit: number, after: PatientPageToken | null, range?: IDBKeyRange): Promise<PatientPage<T>> {
+  if (!Number.isInteger(limit) || limit < 1 || limit > 500) throw new Error('Invalid page size.');
+  await ensurePatientStorage();
+  return transact([store], 'readonly', (tx, done, fail) => {
+    const rows: T[] = [];
+    let next: PatientPageToken | null = null;
+    const request = tx.objectStore(store).index(index).openCursor(range, 'prev');
+    request.onsuccess = () => {
+      try {
+        const cursor = request.result;
+        if (!cursor) { done({ rows, next: null }); return; }
+        if (after) {
+          const order = indexedDB.cmp(cursor.key, after.key);
+          if (order > 0 || (order === 0 && indexedDB.cmp(cursor.primaryKey, after.id) >= 0)) { cursor.continue(); return; }
+        }
+        if (rows.length === limit) { done({ rows, next }); return; }
+        if (!valid(cursor.value)) throw new Error('Invalid saved record.');
+        rows.push(cursor.value);
+        next = { key: cursor.key, id: cursor.primaryKey };
+        cursor.continue();
+      } catch (error) { fail(error); }
+    };
+  });
+}
+export const pageReadings = (limit = 100, after: PatientPageToken | null = null) => indexedPage('readings', 'date', validReading, limit, after);
+export const pageEntries = (kind: string, limit = 100, after: PatientPageToken | null = null) => indexedPage('entries', 'kindDate', validEntry, limit, after, IDBKeyRange.bound([kind, '0001-01-01'], [kind, '9999-12-31']));
