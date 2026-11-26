@@ -33,3 +33,5 @@ test-results
 /blob-report/
 
 /.qa-backups/
+
+.qa-reports/
